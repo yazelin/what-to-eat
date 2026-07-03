@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>今天要吃什麼？</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- 漂浮裝飾 -->
+  <img class="deco deco-heart"  src="assets/主頁/愛心.png" alt="" aria-hidden="true" />
+  <img class="deco deco-spark"  src="assets/主頁/閃光.png" alt="" aria-hidden="true" />
+  <img class="deco deco-rice"   src="assets/主頁/飯糰.png" alt="" aria-hidden="true" />
+  <img class="deco deco-toast"  src="assets/主頁/吐司.png" alt="" aria-hidden="true" />
+  <img class="deco deco-soy"    src="assets/主頁/豆漿.png" alt="" aria-hidden="true" />
+  <img class="deco deco-coffee" src="assets/主頁/咖啡.png" alt="" aria-hidden="true" />
+
+  <main class="app">
+    <header class="app-header">
+      <div class="title-sticker">
+        <span class="title-fork">🍴</span>
+        <h1 class="title">今天要吃什麼？</h1>
+      </div>
+      <p class="subtitle">轉一下，交給命運決定 🍱</p>
+    </header>
+
+    <!-- 分類 Tab -->
+    <div class="tabs" role="tablist" aria-label="餐點分類">
+      <button class="tab is-active" data-category="breakfast" role="tab" aria-selected="true">
+        <span class="tab-ico">🌞</span>早餐
+      </button>
+      <button class="tab" data-category="lunchDinner" role="tab" aria-selected="false">
+        <span class="tab-ico">🌙</span>午晚餐
+      </button>
+    </div>
+
+    <div class="stage">
+      <!-- 轉盤區 -->
+      <section class="wheel-panel">
+        <div class="wheel-area">
+          <img class="pointer" src="assets/主頁/指針.png" alt="指針" />
+          <svg class="wheel" id="wheel" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg" aria-label="餐點轉盤"></svg>
+          <!-- 固定中心笑臉（不隨轉盤旋轉） -->
+          <div class="hub" id="hub">
+            <span class="hub-cheek left"></span>
+            <span class="hub-cheek right"></span>
+            <span class="hub-eye left"></span>
+            <span class="hub-eye right"></span>
+            <span class="hub-mouth"></span>
+          </div>
+          <!-- 中獎時從笑臉噴出的愛心／閃光 -->
+          <div class="hub-fx" id="hubFx" aria-hidden="true">
+            <img class="fx fx1" src="assets/主頁/愛心.png" alt="" />
+            <img class="fx fx2" src="assets/主頁/閃光.png" alt="" />
+            <img class="fx fx3" src="assets/主頁/愛心.png" alt="" />
+            <img class="fx fx4" src="assets/主頁/閃光.png" alt="" />
+            <img class="fx fx5" src="assets/主頁/愛心.png" alt="" />
+            <img class="fx fx6" src="assets/主頁/閃光.png" alt="" />
+            <img class="fx fx7" src="assets/主頁/愛心.png" alt="" />
+            <img class="fx fx8" src="assets/主頁/閃光.png" alt="" />
+          </div>
+        </div>
+        <button class="spin-btn" id="spinBtn">幫我決定！</button>
+      </section>
+
+      <!-- 結果卡 -->
+      <section class="result-panel">
+        <img class="ribbon" id="ribbon" src="assets/主頁/彩帶.png" alt="" aria-hidden="true" />
+        <div class="result-card" id="resultCard">
+          <div class="result-banner" id="resultBanner" hidden>今天早餐吃</div>
+          <p class="result-title" id="resultTitle">按一下，讓轉盤幫你決定！</p>
+          <div class="result-icon-wrap" id="resultIconWrap" hidden>
+            <img class="result-icon" id="resultIcon" src="" alt="" />
+          </div>
+          <div class="result-divider" id="resultDivider" hidden></div>
+          <p class="result-note" id="resultNote" hidden>不用想了，就它了。 <span class="note-heart">💛</span></p>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
