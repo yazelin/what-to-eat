@@ -37,6 +37,10 @@ python -m pip install --quiet Pillow numpy
 # 去背整個資料夾（就地覆寫），先自動備份原圖到各檔旁的 _original/
 python remove_bg.py "assets/飲料" --backup
 
+# 去背並「同時輸出保留透明的 WebP」（一步到位，體積更小）
+python remove_bg.py "assets/飲料" --backup --webp
+python remove_bg.py "assets/飲料" --webp --quality 88
+
 # 指定多個檔案 / glob
 python remove_bg.py "img/a.png" "img/b.png"
 python remove_bg.py "img/*.png"
@@ -62,5 +66,6 @@ python remove_bg.py "assets/飲料" --check "check.png"
 ## 注意
 
 - 檔名／尺寸不變，程式引用相對路徑者無需改動。
+- 加 `--webp` 會在去背輸出旁再存一份 `.webp`（保留 alpha），適合網頁用；`--quality` 控制品質。
 - 中文檔名在 Windows 下用 UTF-8 處理，腳本已支援。
 - 備份資料夾（`_original/`）記得別 commit，或用完刪除／加入 `.gitignore`。

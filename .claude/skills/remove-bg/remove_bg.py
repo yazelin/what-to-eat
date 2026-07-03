@@ -46,7 +46,8 @@ def collect_files(inputs):
     return out
 
 
-def remove_bg(path, thresh, feather, out_dir=None, backup=False):
+def remove_bg(path, thresh, feather, out_dir=None, backup=False,
+              webp=False, quality=90):
     if backup:
         bdir = os.path.join(os.path.dirname(path), "_original")
         os.makedirs(bdir, exist_ok=True)
@@ -110,6 +111,11 @@ def remove_bg(path, thresh, feather, out_dir=None, backup=False):
         target = os.path.join(out_dir, os.path.basename(path))
     out.save(target)
 
+    # 順便輸出 WebP（保留透明）
+    if webp:
+        webp_path = os.path.splitext(target)[0] + ".webp"
+        out.save(webp_path, "WEBP", quality=quality, method=6)
+
     kept = float((alpha > 0).sum()) / (h * w) * 100
     return kept
 
@@ -134,6 +140,8 @@ def main():
     ap.add_argument("--feather", type=float, default=1.2, help="邊緣羽化半徑")
     ap.add_argument("--backup", action="store_true", help="覆寫前備份原圖到 _original/")
     ap.add_argument("--out", default=None, help="輸出資料夾（預設就地覆寫）")
+    ap.add_argument("--webp", action="store_true", help="同時輸出保留透明的 .webp")
+    ap.add_argument("--quality", type=int, default=90, help="WebP 品質（1-100，預設 90）")
     ap.add_argument("--check", default=None, help="產生有色底檢查圖的輸出路徑")
     args = ap.parse_args()
 
@@ -143,8 +151,10 @@ def main():
         sys.exit(1)
 
     for f in files:
-        kept = remove_bg(f, args.thresh, args.feather, args.out, args.backup)
-        print(f"{os.path.basename(f):16s}  保留 {kept:5.1f}%")
+        kept = remove_bg(f, args.thresh, args.feather, args.out, args.backup,
+                         args.webp, args.quality)
+        tag = " +webp" if args.webp else ""
+        print(f"{os.path.basename(f):16s}  保留 {kept:5.1f}%{tag}")
 
     if args.check:
         processed = (
