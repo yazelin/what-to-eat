@@ -73,6 +73,7 @@
           </div>
         </div>
         <button class="spin-btn" id="spinBtn">幫我決定！</button>
+        <button class="edit-btn" id="editBtn">✏️ 編輯菜單</button>
       </section>
 
       <!-- 結果卡 -->
@@ -92,6 +93,32 @@
 
   <!-- 全螢幕彩帶紙屑層（抽中時灑落） -->
   <div class="confetti-layer" id="confettiLayer" aria-hidden="true"></div>
+
+  <!-- 編輯菜單彈窗 -->
+  <div class="edit-modal" id="editModal" hidden>
+    <div class="edit-backdrop"></div>
+    <div class="edit-card" role="dialog" aria-modal="true" aria-labelledby="editTitle">
+      <div class="edit-header">
+        <h2 class="edit-title" id="editTitle">編輯菜單</h2>
+        <button class="edit-close" id="editClose" aria-label="關閉">✕</button>
+      </div>
+
+      <div class="edit-list" id="editList"></div>
+
+      <div class="edit-add">
+        <div class="edit-add-title">➕ 新增餐點</div>
+        <input class="edit-add-name" id="editName" type="text" placeholder="餐點名稱（最多 6 字）" maxlength="6" />
+        <div class="edit-add-label">選一個圖示：</div>
+        <div class="edit-icons" id="editIcons"></div>
+        <button class="edit-add-btn" id="editAddBtn">加入轉盤</button>
+      </div>
+
+      <div class="edit-footer">
+        <button class="edit-reset" id="editReset">↺ 還原此分類預設</button>
+        <button class="edit-done" id="editDone">完成</button>
+      </div>
+    </div>
+  </div>
 
   <script src="script.js"></script>
 </body>

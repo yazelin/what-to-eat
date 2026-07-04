@@ -2,7 +2,7 @@
    今天要吃什麼？ — 純前端餐點轉盤
    ============================================================ */
 
-const meals = {
+const DEFAULT_MEALS = {
   breakfast: [
     { name: "三明治",   icon: "assets/早餐/三明治.webp" },
     { name: "土司夾蛋", icon: "assets/早餐/土司夾蛋.webp" },
@@ -50,6 +50,60 @@ const LABELS = {
   drinks:      "今天飲料喝"
 };
 
+// 分類中文名（給編輯器標題用）
+const CAT_NAMES = {
+  breakfast:   "早餐",
+  lunchDinner: "午晚餐",
+  drinks:      "飲料"
+};
+
+// 新增自訂餐點時可挑選的內建圖示
+const CUSTOM_ICONS = [
+  "assets/自訂/飯類.webp", "assets/自訂/麵類.webp", "assets/自訂/火鍋類.webp",
+  "assets/自訂/點心類.webp", "assets/自訂/素食類.webp", "assets/自訂/肉類.webp",
+  "assets/自訂/蔬菜類.webp", "assets/自訂/甜點類.webp",
+  "assets/自訂/神秘餐點.webp", "assets/自訂/神秘飲料.webp"
+];
+
+// ===== 資料保存（localStorage）=====
+const STORAGE_KEY = "whatToEat.meals.v1";
+const MIN_ITEMS = 2;   // 每分類最少保留項數，避免轉盤退化
+
+function deepClone(obj) {
+  return JSON.parse(JSON.stringify(obj));
+}
+
+function isValidMeals(data) {
+  if (!data || typeof data !== "object") return false;
+  return Object.keys(DEFAULT_MEALS).every((cat) =>
+    Array.isArray(data[cat]) &&
+    data[cat].length >= MIN_ITEMS &&
+    data[cat].every((m) => m && typeof m.name === "string" && typeof m.icon === "string")
+  );
+}
+
+function loadMeals() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const data = JSON.parse(raw);
+      if (isValidMeals(data)) return data;
+    }
+  } catch (e) { /* localStorage 不可用時退回預設 */ }
+  return deepClone(DEFAULT_MEALS);
+}
+
+function saveMeals() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(meals));
+  } catch (e) { /* 隱私模式等：忽略，僅記憶體內有效 */ }
+}
+
+function resetCategory(cat) {
+  meals[cat] = deepClone(DEFAULT_MEALS[cat]);
+  saveMeals();
+}
+
 // 柔和粉彩色循環（奶油黃、米白、淺橘、柔粉、薄荷綠、淡藍）
 const SLICE_COLORS = [
   "#ffe9a8", "#fff2d6", "#ffcf9e", "#ffd3dd", "#c7f0d8", "#cfe6ff"
@@ -60,10 +114,12 @@ const CENTER = 250;   // viewBox 500x500
 const RADIUS = 244;
 
 // ===== 狀態 =====
+let meals = loadMeals();   // 讀取保存的菜單，無則用預設
 let currentCategory = "breakfast";
 let currentRotation = 0;   // 累積旋轉角度（度）
 let isSpinning = false;
 let labelParts = [];       // 每個 icon/文字外層 g 與其錨點，用來反向旋轉維持正立
+let pickedIcon = CUSTOM_ICONS[8];  // 新增餐點目前選中的圖示（預設：神秘餐點）
 
 // ===== DOM =====
 const wheelEl      = document.getElementById("wheel");
@@ -79,6 +135,17 @@ const resultDivider = document.getElementById("resultDivider");
 const hub          = document.getElementById("hub");
 const hubFx        = document.getElementById("hubFx");
 const confettiLayer = document.getElementById("confettiLayer");
+// 編輯器
+const editBtn      = document.getElementById("editBtn");
+const editModal    = document.getElementById("editModal");
+const editClose    = document.getElementById("editClose");
+const editTitle    = document.getElementById("editTitle");
+const editList     = document.getElementById("editList");
+const editName     = document.getElementById("editName");
+const editIcons    = document.getElementById("editIcons");
+const editAddBtn   = document.getElementById("editAddBtn");
+const editReset    = document.getElementById("editReset");
+const editDone     = document.getElementById("editDone");
 
 // ===== 幾何工具 =====
 // 角度以「12 點鐘方向為 0、順時針增加」計算
@@ -343,7 +410,20 @@ function spin() {
 // ===== 控制項啟用/停用 =====
 function setControlsDisabled(disabled) {
   spinBtn.disabled = disabled;
+  editBtn.disabled = disabled;
   tabs.forEach((t) => (t.disabled = disabled));
+}
+
+// ===== 重建轉盤並歸位（切換分類、編輯後共用）=====
+function refreshWheel() {
+  currentRotation = 0;
+  wheelEl.getAnimations().forEach((a) => a.cancel());
+  wheelEl.style.transform = "rotate(0deg)";
+  hub.classList.remove("spinning", "win");   // 表情歸位
+  hubFx.classList.remove("burst");
+  confettiLayer.innerHTML = "";              // 清掉彩帶
+  buildWheel(currentCategory);
+  resetResult();
 }
 
 // ===== 切換分類 =====
@@ -357,15 +437,7 @@ function switchCategory(category) {
     t.setAttribute("aria-selected", active ? "true" : "false");
   });
 
-  // 重置轉盤角度與內容
-  currentRotation = 0;
-  wheelEl.getAnimations().forEach((a) => a.cancel());
-  wheelEl.style.transform = "rotate(0deg)";
-  hub.classList.remove("spinning", "win");   // 表情歸位
-  hubFx.classList.remove("burst");
-  confettiLayer.innerHTML = "";              // 清掉彩帶
-  buildWheel(category);
-  resetResult();
+  refreshWheel();
 }
 
 // ============================================================
@@ -503,6 +575,99 @@ const Sound = (() => {
   return { startBGM, stopBGM, spinTicks, win, click, toggleMute };
 })();
 
+// ============================================================
+//  編輯菜單
+// ============================================================
+function openEditor() {
+  if (isSpinning) return;
+  editTitle.textContent = `編輯「${CAT_NAMES[currentCategory]}」菜單`;
+  renderEditorList();
+  renderIconPicker();
+  editName.value = "";
+  editModal.hidden = false;
+}
+
+function closeEditor() {
+  editModal.hidden = true;
+}
+
+// 編輯後：存檔 + 重建轉盤 + 重繪清單
+function applyEdit() {
+  saveMeals();
+  refreshWheel();
+  renderEditorList();
+}
+
+function renderEditorList() {
+  const list = meals[currentCategory];
+  editList.innerHTML = "";
+  const frag = document.createDocumentFragment();
+
+  list.forEach((meal, i) => {
+    const row = document.createElement("div");
+    row.className = "edit-row";
+
+    const img = document.createElement("img");
+    img.className = "edit-row-icon";
+    img.src = meal.icon;
+    img.alt = meal.name;
+
+    const input = document.createElement("input");
+    input.className = "edit-row-name";
+    input.type = "text";
+    input.value = meal.name;
+    input.maxLength = 6;
+    input.addEventListener("change", () => {
+      const v = input.value.trim();
+      if (v) { meals[currentCategory][i].name = v; applyEdit(); }
+      else { input.value = meal.name; }   // 空白還原
+    });
+
+    const del = document.createElement("button");
+    del.className = "edit-row-del";
+    del.type = "button";
+    del.textContent = "✕";
+    del.title = "刪除";
+    del.disabled = list.length <= MIN_ITEMS;
+    del.addEventListener("click", () => {
+      if (meals[currentCategory].length <= MIN_ITEMS) return;
+      Sound.click();
+      meals[currentCategory].splice(i, 1);
+      applyEdit();
+    });
+
+    row.append(img, input, del);
+    frag.appendChild(row);
+  });
+
+  editList.appendChild(frag);
+}
+
+function renderIconPicker() {
+  editIcons.innerHTML = "";
+  CUSTOM_ICONS.forEach((icon) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "icon-pick" + (icon === pickedIcon ? " is-picked" : "");
+    b.innerHTML = `<img src="${icon}" alt="" />`;
+    b.addEventListener("click", () => {
+      pickedIcon = icon;
+      renderIconPicker();
+    });
+    editIcons.appendChild(b);
+  });
+}
+
+function addMeal() {
+  const name = editName.value.trim();
+  if (!name) { editName.focus(); return; }
+  if (!pickedIcon) return;
+  Sound.click();
+  meals[currentCategory].push({ name, icon: pickedIcon });
+  editName.value = "";
+  applyEdit();
+}
+
 // ===== 事件 =====
 spinBtn.addEventListener("click", () => {
   if (isSpinning) return;
@@ -517,6 +682,24 @@ tabs.forEach((t) => {
     Sound.click();
     switchCategory(t.dataset.category);
   });
+});
+
+editBtn.addEventListener("click", () => { Sound.click(); openEditor(); });
+editClose.addEventListener("click", () => { Sound.click(); closeEditor(); });
+editDone.addEventListener("click", () => { Sound.click(); closeEditor(); });
+editAddBtn.addEventListener("click", addMeal);
+editName.addEventListener("keydown", (e) => { if (e.key === "Enter") addMeal(); });
+editReset.addEventListener("click", () => {
+  Sound.click();
+  resetCategory(currentCategory);
+  refreshWheel();
+  renderEditorList();
+});
+editModal.addEventListener("click", (e) => {
+  if (e.target === editModal || e.target.classList.contains("edit-backdrop")) closeEditor();
+});
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && !editModal.hidden) closeEditor();
 });
 
 // ===== 初始化 =====
