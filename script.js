@@ -404,6 +404,11 @@ function spin() {
     launchConfetti();                // 全螢幕彩帶灑落
     Sound.win();                     // 中獎音效
     showResult(list[index]);
+
+    // 手機（單欄）：轉完自動捲到結果卡
+    if (window.matchMedia("(max-width: 780px)").matches) {
+      resultCard.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
   };
 }
 
