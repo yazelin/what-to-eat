@@ -4,9 +4,11 @@
 
 純前端、無框架、無後端，直接用瀏覽器打開 `index.html` 就能玩。
 
-### 👉 線上試玩：**https://craig7351.github.io/what-to-eat/**
+> Fork 自 [craig7351/what-to-eat](https://github.com/craig7351/what-to-eat)，補上 SEO / Open Graph meta 與轉動過程全程正立的修正，之後獨立維護、不再回報上游。
 
-[![線上試玩](https://img.shields.io/badge/🎡_線上試玩-craig7351.github.io-ff7f9c)](https://craig7351.github.io/what-to-eat/) ![分類](https://img.shields.io/badge/分類-早餐%20%7C%20午晚餐%20%7C%20飲料-ffcf4d) ![tech](https://img.shields.io/badge/tech-HTML%20%2B%20CSS%20%2B%20JS-77c) ![deps](https://img.shields.io/badge/dependencies-0-4caf50)
+### 👉 線上試玩：**https://yazelin.github.io/what-to-eat/**
+
+[![線上試玩](https://img.shields.io/badge/🎡_線上試玩-yazelin.github.io-ff7f9c)](https://yazelin.github.io/what-to-eat/) ![分類](https://img.shields.io/badge/分類-早餐%20%7C%20午晚餐%20%7C%20飲料-ffcf4d) ![tech](https://img.shields.io/badge/tech-HTML%20%2B%20CSS%20%2B%20JS-77c) ![deps](https://img.shields.io/badge/dependencies-0-4caf50)
 
 ![畫面預覽](docs/preview.webp)
 
