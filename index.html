@@ -114,24 +114,26 @@
   <div class="edit-modal" id="editModal" hidden>
     <div class="edit-backdrop"></div>
     <div class="edit-card" role="dialog" aria-modal="true" aria-labelledby="editTitle">
-      <div class="edit-header">
-        <h2 class="edit-title" id="editTitle">編輯菜單</h2>
-        <button class="edit-close" id="editClose" aria-label="關閉">✕</button>
-      </div>
+      <div class="edit-scroll">
+        <div class="edit-header">
+          <h2 class="edit-title" id="editTitle">編輯菜單</h2>
+          <button class="edit-close" id="editClose" aria-label="關閉">✕</button>
+        </div>
 
-      <div class="edit-list" id="editList"></div>
+        <div class="edit-list" id="editList"></div>
 
-      <div class="edit-add">
-        <div class="edit-add-title">➕ 新增餐點</div>
-        <input class="edit-add-name" id="editName" type="text" placeholder="餐點名稱（最多 6 字）" maxlength="6" />
-        <div class="edit-add-label">選一個圖示：</div>
-        <div class="edit-icons" id="editIcons"></div>
-        <button class="edit-add-btn" id="editAddBtn">加入轉盤</button>
-      </div>
+        <div class="edit-add">
+          <div class="edit-add-title">➕ 新增餐點</div>
+          <input class="edit-add-name" id="editName" type="text" placeholder="餐點名稱（最多 6 字）" maxlength="6" />
+          <div class="edit-add-label">選一個圖示：</div>
+          <div class="edit-icons" id="editIcons"></div>
+          <button class="edit-add-btn" id="editAddBtn">加入轉盤</button>
+        </div>
 
-      <div class="edit-footer">
-        <button class="edit-reset" id="editReset">↺ 還原此分類預設</button>
-        <button class="edit-done" id="editDone">完成</button>
+        <div class="edit-footer">
+          <button class="edit-reset" id="editReset">↺ 還原此分類預設</button>
+          <button class="edit-done" id="editDone">完成</button>
+        </div>
       </div>
     </div>
   </div>
