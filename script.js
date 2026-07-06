@@ -279,6 +279,23 @@ function applyUpright(rot) {
   });
 }
 
+// 讀取轉盤目前實際的旋轉角度（度），供動畫過程中每一幀反向抵銷用
+function currentWheelAngleDeg() {
+  const t = getComputedStyle(wheelEl).transform;
+  if (!t || t === "none") return 0;
+  const m = new DOMMatrixReadOnly(t);
+  return Math.atan2(m.b, m.a) * (180 / Math.PI);
+}
+
+let uprightRaf = null;
+
+// 動畫進行中持續同步：每一幀都反向抵銷轉盤「當下」角度，而不是只校準終點，
+// 這樣文字／icon 在整段轉動過程都保持正立，不會只在轉完那一刻才歸正
+function syncUprightWhileSpinning() {
+  applyUpright(currentWheelAngleDeg());
+  if (isSpinning) uprightRaf = requestAnimationFrame(syncUprightWhileSpinning);
+}
+
 // ===== 重置結果卡 =====
 function resetResult() {
   resultBanner.hidden = true;
@@ -370,12 +387,12 @@ function spin() {
   hub.classList.add("spinning");   // 轉動中眨眼
   hubFx.classList.remove("burst");
 
-  // 先把文字/圖案反轉到「最終角度」的正立狀態：
-  // 螢幕上的傾角 = 轉盤角度 − finalRotation，隨轉盤轉到 finalRotation 時歸零 → 正立
-  applyUpright(finalRotation);
-
   // 轉動音效：用實際旋轉量與格數推算 tick，與轉盤減速完全同步
   Sound.spinTicks(4200, finalRotation - currentRotation, n);
+
+  // 每一幀持續反向抵銷轉盤「當下」角度，全程正立（不是只校準終點）
+  if (uprightRaf) cancelAnimationFrame(uprightRaf);
+  syncUprightWhileSpinning();
 
   const anim = wheelEl.animate(
     [
@@ -394,6 +411,8 @@ function spin() {
     // 鎖定最終狀態
     wheelEl.style.transform = `rotate(${finalRotation}deg)`;
     isSpinning = false;
+    if (uprightRaf) { cancelAnimationFrame(uprightRaf); uprightRaf = null; }
+    applyUpright(finalRotation);   // 精準鎖定正立，避免逐幀同步的浮點誤差殘留
     setControlsDisabled(false);
     hub.classList.remove("spinning");
     hub.classList.add("win");        // 轉完咧嘴大笑
